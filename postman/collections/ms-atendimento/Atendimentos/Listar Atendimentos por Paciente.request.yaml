@@ -1,0 +1,27 @@
+$kind: http-request
+name: 'Listar Atendimentos por Paciente'
+method: GET
+url: '{{base_url}}/atendimentos?pacienteId=1'
+order: 3000
+queryParams:
+  - key: pacienteId
+    value: '1'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 200 - OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Resposta é um array", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.be.an("array");
+      });
+
+      pm.test("Todos os atendimentos pertencem ao paciente filtrado", function () {
+          const json = pm.response.json();
+          json.forEach(function (item) {
+              pm.expect(item.pacienteId).to.eql(1);
+          });
+      });

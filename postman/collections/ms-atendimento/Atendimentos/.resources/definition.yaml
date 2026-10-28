@@ -1,0 +1,3 @@
+$kind: collection
+name: 'Atendimentos'
+description: 'Endpoints para abertura, consulta e finalização de atendimentos.'

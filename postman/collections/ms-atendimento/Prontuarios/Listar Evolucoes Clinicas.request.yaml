@@ -1,0 +1,29 @@
+$kind: http-request
+name: 'Listar Evoluções Clínicas'
+method: GET
+url: '{{base_url}}/prontuarios/{{prontuario_id}}/evolucoes'
+order: 6000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 200 - OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Resposta é um array", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.be.an("array");
+      });
+
+      pm.test("Cada evolução tem campos SOAP", function () {
+          const json = pm.response.json();
+          json.forEach(function (item) {
+              pm.expect(item).to.have.property("id");
+              pm.expect(item).to.have.property("atendimentoId");
+              pm.expect(item).to.have.property("subjetivo");
+              pm.expect(item).to.have.property("objetivo");
+              pm.expect(item).to.have.property("avaliacao");
+              pm.expect(item).to.have.property("plano");
+          });
+      });

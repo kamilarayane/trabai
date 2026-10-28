@@ -1,0 +1,28 @@
+$kind: http-request
+name: 'Listar Diagnósticos por Atendimento'
+method: GET
+url: '{{base_url}}/diagnosticos?atendimentoId={{atendimento_id}}'
+order: 3000
+queryParams:
+  - key: atendimentoId
+    value: '{{atendimento_id}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 200 - OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Resposta é um array", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.be.an("array");
+      });
+
+      pm.test("Todos os diagnósticos pertencem ao atendimento filtrado", function () {
+          const json = pm.response.json();
+          const atendimentoId = Number(pm.collectionVariables.get("atendimento_id"));
+          json.forEach(function (item) {
+              pm.expect(item.atendimentoId).to.eql(atendimentoId);
+          });
+      });

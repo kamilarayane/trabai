@@ -1,0 +1,36 @@
+$kind: http-request
+name: 'Atualizar Prontuário'
+method: PUT
+url: '{{base_url}}/prontuarios/{{prontuario_id}}'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "pacienteId": 1,
+      "alergias": "Penicilina, Dipirona",
+      "medicamentosEmUso": "Losartana 50mg, Metformina 850mg",
+      "doencasPreExistentes": "Hipertensão arterial, Diabetes tipo 2",
+      "historicoFamiliar": "Diabetes tipo 2 (pai), Hipertensão (mãe)"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 200 - OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Prontuário atualizado com sucesso", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("id");
+          pm.expect(json).to.have.property("pacienteId");
+      });
+
+      pm.test("Dados atualizados refletem na resposta", function () {
+          const json = pm.response.json();
+          pm.expect(json.alergias).to.be.a("string").and.not.empty;
+      });

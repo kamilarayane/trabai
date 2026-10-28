@@ -1,0 +1,48 @@
+$kind: http-request
+name: 'Registrar Diagnóstico'
+method: POST
+url: '{{base_url}}/diagnosticos'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "atendimentoId": {{atendimento_id}},
+      "codigoCid10": "J06.9",
+      "descricao": "Infecção aguda das vias aéreas superiores não especificada",
+      "tipo": "PRINCIPAL"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 201 - Diagnóstico criado", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Resposta contém ID do diagnóstico", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("id");
+          pm.expect(json.id).to.be.a("number");
+      });
+
+      pm.test("Campos obrigatórios presentes", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("atendimentoId");
+          pm.expect(json).to.have.property("codigoCid10");
+          pm.expect(json).to.have.property("descricao");
+          pm.expect(json).to.have.property("tipo");
+      });
+
+      pm.test("Tipo do diagnóstico é válido", function () {
+          const json = pm.response.json();
+          pm.expect(["PRINCIPAL", "SECUNDARIO"]).to.include(json.tipo);
+      });
+
+      const json = pm.response.json();
+      if (json && json.id) {
+          pm.collectionVariables.set("diagnostico_id", json.id);
+      }

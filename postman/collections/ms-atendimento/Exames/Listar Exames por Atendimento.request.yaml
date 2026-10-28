@@ -1,0 +1,38 @@
+$kind: http-request
+name: 'Listar Exames por Atendimento'
+method: GET
+url: '{{base_url}}/exames?atendimentoId={{atendimento_id}}'
+order: 2000
+queryParams:
+  - key: atendimentoId
+    value: '{{atendimento_id}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 200 - OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Resposta é um array", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.be.an("array");
+      });
+
+      pm.test("Cada exame tem campos obrigatórios", function () {
+          const json = pm.response.json();
+          json.forEach(function (item) {
+              pm.expect(item).to.have.property("id");
+              pm.expect(item).to.have.property("codigoTuss");
+              pm.expect(item).to.have.property("descricao");
+              pm.expect(item).to.have.property("status");
+          });
+      });
+
+      pm.test("Status dos exames são válidos", function () {
+          const json = pm.response.json();
+          const statusValidos = ["SOLICITADO", "REALIZADO", "CANCELADO"];
+          json.forEach(function (item) {
+              pm.expect(statusValidos).to.include(item.status);
+          });
+      });

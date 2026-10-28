@@ -1,0 +1,3 @@
+$kind: collection
+name: 'Prontuários'
+description: 'Endpoints para criação, consulta e atualização de prontuários e evoluções clínicas.'

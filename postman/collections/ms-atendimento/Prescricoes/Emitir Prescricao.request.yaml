@@ -1,0 +1,49 @@
+$kind: http-request
+name: 'Emitir Prescrição'
+method: POST
+url: '{{base_url}}/prescricoes'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "atendimentoId": {{atendimento_id}},
+      "medicamento": "Amoxicilina",
+      "dosagem": "500mg",
+      "posologia": "1 comprimido a cada 8 horas",
+      "duracao": "7 dias"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 201 - Prescrição emitida", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Resposta contém ID da prescrição", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("id");
+          pm.expect(json.id).to.be.a("number");
+      });
+
+      pm.test("Campos obrigatórios presentes", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("atendimentoId");
+          pm.expect(json).to.have.property("medicamento");
+          pm.expect(json).to.have.property("dosagem");
+          pm.expect(json).to.have.property("posologia");
+      });
+
+      pm.test("Medicamento não está vazio", function () {
+          const json = pm.response.json();
+          pm.expect(json.medicamento).to.be.a("string").and.not.empty;
+      });
+
+      const json = pm.response.json();
+      if (json && json.id) {
+          pm.collectionVariables.set("prescricao_id", json.id);
+      }

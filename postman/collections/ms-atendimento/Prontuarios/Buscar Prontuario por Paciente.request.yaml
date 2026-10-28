@@ -1,0 +1,19 @@
+$kind: http-request
+name: 'Buscar Prontuário por Paciente'
+method: GET
+url: '{{base_url}}/prontuarios/paciente/1'
+order: 3000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 200 - OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Retorna prontuário do paciente correto", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("id");
+          pm.expect(json).to.have.property("pacienteId");
+          pm.expect(json.pacienteId).to.eql(1);
+      });

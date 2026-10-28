@@ -1,0 +1,16 @@
+$kind: collection
+name: 'ms-atendimento'
+description: 'Coleção de testes do microserviço de atendimento clínico. Cobre Atendimentos, Diagnósticos, Exames, Prescrições e Prontuários.'
+variables:
+  - key: base_url
+    value: 'http://localhost:8080'
+  - key: atendimento_id
+    value: ''
+  - key: diagnostico_id
+    value: ''
+  - key: exame_id
+    value: ''
+  - key: prescricao_id
+    value: ''
+  - key: prontuario_id
+    value: ''

@@ -1,0 +1,47 @@
+$kind: http-request
+name: 'Abrir Atendimento'
+method: POST
+url: '{{base_url}}/atendimentos'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "consultaId": 1,
+      "pacienteId": 1,
+      "medicoId": 1
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 201 - Atendimento criado", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Resposta contém ID do atendimento", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("id");
+          pm.expect(json.id).to.be.a("number");
+      });
+
+      pm.test("Status do atendimento é EM_ANDAMENTO", function () {
+          const json = pm.response.json();
+          pm.expect(json.status).to.eql("EM_ANDAMENTO");
+      });
+
+      pm.test("Campos obrigatórios presentes", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("consultaId");
+          pm.expect(json).to.have.property("pacienteId");
+          pm.expect(json).to.have.property("medicoId");
+      });
+
+      // Salva o ID para usar nos próximos requests
+      const json = pm.response.json();
+      if (json && json.id) {
+          pm.collectionVariables.set("atendimento_id", json.id);
+      }

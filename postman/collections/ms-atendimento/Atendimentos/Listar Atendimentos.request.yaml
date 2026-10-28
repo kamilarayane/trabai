@@ -1,0 +1,28 @@
+$kind: http-request
+name: 'Listar Atendimentos'
+method: GET
+url: '{{base_url}}/atendimentos'
+order: 2000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 200 - OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Resposta é um array", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.be.an("array");
+      });
+
+      pm.test("Cada atendimento tem campos obrigatórios", function () {
+          const json = pm.response.json();
+          json.forEach(function (item) {
+              pm.expect(item).to.have.property("id");
+              pm.expect(item).to.have.property("consultaId");
+              pm.expect(item).to.have.property("pacienteId");
+              pm.expect(item).to.have.property("medicoId");
+              pm.expect(item).to.have.property("status");
+          });
+      });

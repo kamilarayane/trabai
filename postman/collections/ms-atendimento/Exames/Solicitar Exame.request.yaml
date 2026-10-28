@@ -1,0 +1,48 @@
+$kind: http-request
+name: 'Solicitar Exame'
+method: POST
+url: '{{base_url}}/exames'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "atendimentoId": {{atendimento_id}},
+      "codigoTuss": "40304361",
+      "descricao": "Hemograma completo",
+      "urgente": false
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 201 - Exame solicitado", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Resposta contém ID do exame", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("id");
+          pm.expect(json.id).to.be.a("number");
+      });
+
+      pm.test("Campos obrigatórios presentes", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("atendimentoId");
+          pm.expect(json).to.have.property("codigoTuss");
+          pm.expect(json).to.have.property("descricao");
+          pm.expect(json).to.have.property("status");
+      });
+
+      pm.test("Status inicial do exame é SOLICITADO", function () {
+          const json = pm.response.json();
+          pm.expect(json.status).to.eql("SOLICITADO");
+      });
+
+      const json = pm.response.json();
+      if (json && json.id) {
+          pm.collectionVariables.set("exame_id", json.id);
+      }

@@ -1,0 +1,31 @@
+$kind: http-request
+name: 'Listar Prescrições por Atendimento'
+method: GET
+url: '{{base_url}}/prescricoes?atendimentoId={{atendimento_id}}'
+order: 2000
+queryParams:
+  - key: atendimentoId
+    value: '{{atendimento_id}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 200 - OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Resposta é um array", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.be.an("array");
+      });
+
+      pm.test("Cada prescrição tem campos obrigatórios", function () {
+          const json = pm.response.json();
+          json.forEach(function (item) {
+              pm.expect(item).to.have.property("id");
+              pm.expect(item).to.have.property("atendimentoId");
+              pm.expect(item).to.have.property("medicamento");
+              pm.expect(item).to.have.property("dosagem");
+              pm.expect(item).to.have.property("posologia");
+          });
+      });

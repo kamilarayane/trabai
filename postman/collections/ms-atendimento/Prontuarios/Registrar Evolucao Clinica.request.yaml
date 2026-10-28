@@ -1,0 +1,47 @@
+$kind: http-request
+name: 'Registrar Evolução Clínica'
+method: POST
+url: '{{base_url}}/prontuarios/{{prontuario_id}}/evolucoes'
+order: 5000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "atendimentoId": {{atendimento_id}},
+      "subjetivo": "Paciente relata dor de garganta há 3 dias, febre e dificuldade para engolir.",
+      "objetivo": "Temperatura 38.5°C, orofaringe hiperemiada com exsudato purulento.",
+      "avaliacao": "Tonsilite bacteriana aguda.",
+      "plano": "Antibioticoterapia com Amoxicilina 500mg 8/8h por 7 dias. Retorno em 7 dias."
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 201 - Evolução registrada", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Resposta contém ID da evolução", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("id");
+          pm.expect(json.id).to.be.a("number");
+      });
+
+      pm.test("Campos SOAP presentes", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("subjetivo");
+          pm.expect(json).to.have.property("objetivo");
+          pm.expect(json).to.have.property("avaliacao");
+          pm.expect(json).to.have.property("plano");
+      });
+
+      pm.test("Campos SOAP não estão vazios", function () {
+          const json = pm.response.json();
+          pm.expect(json.subjetivo).to.be.a("string").and.not.empty;
+          pm.expect(json.objetivo).to.be.a("string").and.not.empty;
+          pm.expect(json.avaliacao).to.be.a("string").and.not.empty;
+          pm.expect(json.plano).to.be.a("string").and.not.empty;
+      });

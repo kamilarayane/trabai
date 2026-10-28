@@ -1,0 +1,41 @@
+$kind: http-request
+name: 'Criar Prontuário'
+method: POST
+url: '{{base_url}}/prontuarios'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "pacienteId": 1,
+      "alergias": "Penicilina",
+      "medicamentosEmUso": "Losartana 50mg",
+      "doencasPreExistentes": "Hipertensão arterial",
+      "historicoFamiliar": "Diabetes tipo 2 (pai)"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status 201 - Prontuário criado", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Resposta contém ID do prontuário", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("id");
+          pm.expect(json.id).to.be.a("number");
+      });
+
+      pm.test("pacienteId está presente", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("pacienteId");
+      });
+
+      const json = pm.response.json();
+      if (json && json.id) {
+          pm.collectionVariables.set("prontuario_id", json.id);
+      }
